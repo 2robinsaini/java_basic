@@ -1,0 +1,167 @@
+
+package com.java.ParserXML;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+/**
+ * 
+ * @author Robin.Kumar
+ *
+ */
+public class CustomXMLParser {
+
+	static List<String> tagNamelist = new ArrayList<String>();
+	
+	public static void main(String[] args) {
+
+		if (args.length != 2) {
+			System.out.println("Please provide input xml and output xml file path");
+			return;
+		} else {
+			System.out.println("XML parsing in progress... Please wait...");
+			String inputFilePath = args[0];
+			String outputFilePath = args[1];
+			parseXMLFile(inputFilePath, outputFilePath);
+		}
+
+	}
+
+	/**
+	 * 
+	 * @param inputFilePath
+	 * @param outputFilePath
+	 *            method takes input and output file path and parse the file and
+	 *            save it.
+	 */
+	private static void parseXMLFile(String inputFilePath, String outputFilePath) {
+
+		DocumentBuilderFactory dbFactoryOut = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilderOut;
+
+		String filePath = inputFilePath;
+		File xmlFile = new File(filePath);
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		try {
+
+			dBuilderOut = dbFactoryOut.newDocumentBuilder();
+			Document docOut = dBuilderOut.newDocument();
+			//Element rootElement = docOut.createElementNS("Customer", "GetReportBlock_CustomerResponse");
+			Element rootElement = docOut.createElement("GetReportBlock_CustomerResponse");
+			docOut.appendChild(rootElement);
+
+			dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(xmlFile);
+			doc.getDocumentElement().normalize();
+			NodeList nodeList = doc.getElementsByTagName("GetReportBlock_CustomerResponse");
+
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				rootElement = getCustomer(rootElement, docOut, nodeList.item(0));
+			}
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			DOMSource source = new DOMSource(docOut);
+			StreamResult console = new StreamResult(System.out);
+			StreamResult file = new StreamResult(new File(outputFilePath));
+			transformer.transform(source, console);
+			transformer.transform(source, file);
+			System.out.println("DONE");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	/**
+	 * 
+	 * @param rootElement
+	 * @param docOut
+	 * @param node
+	 * @return rootElement after adding all the xml tags
+	 */
+	private static Element getCustomer(Element rootElement, Document docOut, Node node) {
+		Node customersNode = docOut.createElement("Customers");
+		int rowCount = tagNamelist.size();
+		Element cust = null;
+		if (node.getNodeType() == Node.ELEMENT_NODE) {
+			NodeList cNodes = node.getChildNodes();
+			for (int i = 0; i < cNodes.getLength(); i++) {
+				for (int j = 0; j < cNodes.item(i).getChildNodes().getLength(); j++) {
+					int index = 0;
+					Node customerNode = docOut.createElement("Customer");
+					for (int k = 1; k < cNodes.item(i).getChildNodes().item(j).getChildNodes().getLength(); k = k + 2) {
+						boolean isChildNode = cNodes.item(i).getChildNodes().item(j).getChildNodes().item(k)
+								.hasChildNodes();
+						rowCount = tagNamelist.size();
+						
+						if (!isChildNode && i > 1) {
+							index = (index >= rowCount) ? 0 : index;
+							String tagName = tagNamelist.get(index);
+							customerNode.appendChild(getNewElements(docOut, cust, tagName, "null"));
+							customersNode.appendChild(customerNode);
+							rootElement.appendChild(customersNode);
+							index++;
+							continue;
+						}
+						for (int l = 0; l < cNodes.item(i).getChildNodes().item(j).getChildNodes().item(k)
+								.getChildNodes().getLength(); l++) {
+							String tagValue = cNodes.item(i).getChildNodes().item(j).getChildNodes().item(k)
+									.getChildNodes().item(l).getNodeValue();
+							if (i == 1) {
+
+								// Replace space with underscore as space in not
+								// allowed xml tags
+								tagNamelist.add(cNodes.item(i).getChildNodes().item(j).getChildNodes().item(k)
+										.getChildNodes().item(l).getNodeValue().replaceAll(" ", "_").replaceAll("\\(", "_").replaceAll("\\)", "_"));
+							} else {
+								rowCount = tagNamelist.size();
+								index = (index >= rowCount) ? 0 : index;
+								String tagName = tagNamelist.get(index);
+
+								tagValue = (tagValue == null) ? "null" : tagValue;
+								customerNode.appendChild(getNewElements(docOut, cust, tagName, tagValue));
+
+								customersNode.appendChild(customerNode);
+								rootElement.appendChild(customersNode);
+								index++;
+							}
+						}
+					}
+
+					String tagKey = cNodes.item(i).getChildNodes().item(j).getParentNode().getNodeName();
+					String tagValue = cNodes.item(i).getChildNodes().item(j).getNodeValue();
+
+					if (!tagKey.equals("table") && !tagKey.equals("headers")) {
+						tagValue = (tagValue.trim().equals("")) ? "null" : tagValue;
+						rootElement.appendChild(getNewElements(docOut, cust, tagKey, tagValue));
+					}
+				}
+			}
+		}
+		System.out.println("size of row: " + rowCount);
+		return rootElement;
+	}
+
+	private static Node getNewElements(Document docOut, Element cust, String nodeName, String nodeValue) {
+		Element node = docOut.createElement(nodeName);
+		node.appendChild(docOut.createTextNode(nodeValue));
+		return node;
+
+	}
+}
