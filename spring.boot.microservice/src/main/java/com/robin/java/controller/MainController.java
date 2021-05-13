@@ -12,5 +12,4 @@ public class MainController {
 		return "Welcome to the Springboot Microservice!";
 	}
 	
-	
 }
