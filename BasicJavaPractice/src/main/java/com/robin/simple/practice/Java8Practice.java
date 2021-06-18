@@ -3,10 +3,10 @@ package com.robin.simple.practice;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
@@ -16,29 +16,105 @@ public class Java8Practice {
 
 	public static void main(String[] args) {
 
+		int[] input = new int[] { 2, 7, 4, 9, 1, 11 };
+		int keyIndex = 2;
+		int tmp = 0;
+
+		// Move all the lesser number to left of value at keyIndex and move all the
+		// greater number to right of value at keyIndex
+		for (int j = 0; j < input.length; j++) {
+			for (int i = 0; i < input.length; i++) {
+				if ((input[i] > input[keyIndex] && i < keyIndex) || (input[i] < input[keyIndex] && i > keyIndex)) {
+					tmp = input[keyIndex];
+					input[keyIndex] = input[i];
+					input[i] = tmp;
+					keyIndex = i;
+				}
+			}
+		}
+
+		for (int i = 0; i < input.length; i++) {
+			System.out.print(input[i] + " ");
+		}
+
+		System.out.println();
+
+		// java8();
+
+		int[] nums = new int[] { 34, 10, 47, 40, 120, 75, 14, 30, 457, 63, 24, 8 };
+
+		int firstMax = 0;
+		int secondMax = 0;
+		int indexfirstMax = 0;
+		int indexsecondMax = 0;
+		for (int i = 0; i < nums.length; i++) {
+			if (nums[i] > firstMax && nums[i] > secondMax) {
+				secondMax = firstMax;
+				indexsecondMax = indexfirstMax;
+				firstMax = nums[i];
+				indexfirstMax = i;
+
+			} else if (nums[i] > firstMax) {
+				firstMax = nums[i];
+				indexfirstMax = i;
+			} else if (nums[i] > secondMax && nums[i] < firstMax) {
+				secondMax = nums[i];
+				indexsecondMax = i;
+			}
+		}
+		System.out.println(indexfirstMax + " " + indexsecondMax);
+
+		List<List<String>> list = new ArrayList<List<String>>();
+		List<String> mulkiRaj = Arrays.asList("rashmi", "robin");
+		List<String> dharampal = Arrays.asList("Manju", "babli", "vikas", "babloo");
+		List<String> sukhpal = Arrays.asList("ruchi", "rachna", "sonu");
+		List<String> baburam = Arrays.asList("ramesh", "jawahar");
+		List<String> balbeer = Arrays.asList("mamta", "madhu", "neeraj", "arti");
+		List<String> satbeer = Arrays.asList("gudia", "mukul", "cheeku");
+
+		list.add(mulkiRaj);
+		list.add(dharampal);
+		list.add(sukhpal);
+		list.add(baburam);
+		list.add(balbeer);
+		list.add(satbeer);
+
+		List<String> all = list.stream().flatMap(l -> l.stream()).collect(Collectors.toList());
+		System.out.println(all);
+
+	}
+
+	private static void java8() {
 		ZonedDateTime LAZonedDateTime = LocalDateTime.now().atZone(Calendar.getInstance().getTimeZone().toZoneId());
 		System.out.println(LAZonedDateTime.toString());
 
-		
 		List<Employees> emps = new ArrayList<>();
 		getEmployees(emps);
 
 		emps.stream().forEach(e -> System.out.println(e));
 
-		
 		System.out.println("Only Cricketer");
 		emps.stream().filter(e -> e.getDepartment().equalsIgnoreCase("cricket")).forEach(e -> System.out.println(e));
-		
+
 		System.out.println("city of news anchor");
-		emps.stream().filter(e -> e.getDepartment().equalsIgnoreCase("news anchor")).map(e -> e.getAddress().getCity()).forEach(e -> System.out.println(e));
-		
+		emps.stream().filter(e -> e.getDepartment().equalsIgnoreCase("news anchor")).map(e -> e.getAddress().getCity())
+				.forEach(e -> System.out.println(e));
+
 		System.out.println("HR, with name,salary as key value in Map");
-		
-		//Used Lambda expression as well as method reference
-		Map<String,Integer> map = emps.stream().filter(e -> e.getDepartment().equalsIgnoreCase("HR")).collect(Collectors.toMap( e -> e.getName(),Employees::getSalary));
+
+		// Used Lambda expression as well as method reference
+		Map<String, Integer> map = emps.stream().filter(e -> e.getDepartment().equalsIgnoreCase("HR"))
+				.collect(Collectors.toMap(e -> e.getName(), Employees::getSalary));
 		map.entrySet().stream().forEach(ent -> System.out.println(ent.getKey() + " --> " + ent.getValue()));
-		
-		
+
+		System.out.println("*************************");
+
+		List<Employees> employeesList = emps.stream().filter(ad -> ad.salary > 20000)
+				.peek(e -> System.out.println(e.name + " before ")).filter(ad -> ad.age > 30)
+				.peek(e -> System.out.println(e.name)).collect(Collectors.toList());
+
+		employeesList.forEach(System.out::print);
+
 	}
 
 	private static void getEmployees(List<Employees> emps) {
@@ -65,7 +141,6 @@ public class Java8Practice {
 		Employees emp9 = new Employees(42, 55000, "Virat Kohli", "Cricket", a9);
 		Employees emp10 = new Employees(63, 75000, "PV Sindhu", "Badminton", a10);
 
-		
 		emps.add(emp1);
 		emps.add(emp2);
 		emps.add(emp3);
