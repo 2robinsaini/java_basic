@@ -1,10 +1,10 @@
-package com.robin.eureka.server.eureka.server;
+package rob.in.SpringBootTemplate;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApplicationTests {
+class SpringBootTemplateApplicationTests {
 
 	@Test
 	void contextLoads() {

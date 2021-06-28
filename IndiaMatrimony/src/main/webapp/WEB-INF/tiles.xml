@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+    <!DOCTYPE tiles-definitions PUBLIC  
+           "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"  
+           "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+	<definition name="base.appPage"
+		template="/WEB-INF/views/tile/layoutApp.jsp">
+		<put-attribute name="title" value="" />
+		<put-attribute name="header"
+			value="/WEB-INF/views/tile/header.jsp" />
+		<put-attribute name="menu"
+			value="/WEB-INF/views/tile/menu.jsp" />
+		<put-attribute name="body" value="" />
+		<put-attribute name="footer"
+			value="/WEB-INF/views/tile/footer.jsp" />
+	</definition>
+	<definition name="base.loginPage"
+		template="/WEB-INF/views/tile/layoutLogin.jsp">
+		<put-attribute name="title" value="" />
+		<put-attribute name="header"
+			value="/WEB-INF/views/tile/header.jsp" />
+		<!-- <put-attribute name="menu" value="/WEB-INF/views/tile/menu.jsp" /> -->
+		<put-attribute name="body" value="" />
+		<!-- <put-attribute name="footer" value="/WEB-INF/views/tile/footer.jsp" 
+			/> -->
+	</definition>
+
+	<definition name="login" extends="base.loginPage">
+		<put-attribute name="title" value="User Login" />
+		<put-attribute name="body"
+			value="/WEB-INF/views/page/login.jsp" />
+	</definition>
+	 
+	<definition name="signup" extends="base.appPage">
+		<put-attribute name="title" value="User Registration" />
+		<put-attribute name="body"
+			value="/WEB-INF/views/page/signup.jsp" />
+	</definition>
+	
+	
+	<definition name="newuser" extends="base.loginPage">
+		<put-attribute name="title" value="User Registration" />
+		<put-attribute name="body"
+			value="/WEB-INF/views/page/newuser.jsp" />
+	</definition>
+
+	<definition name="home" extends="base.appPage">
+		<put-attribute name="title" value="Home Page" />
+		<put-attribute name="body"
+			value="/WEB-INF/views/page/home.jsp" />
+	</definition>
+
+
+	<definition name="users" extends="base.appPage">
+		<put-attribute name="title" value="Home Page" />
+		<put-attribute name="body"
+			value="/WEB-INF/views/page/users.jsp" />
+	</definition>
+
+
+	
+
+</tiles-definitions>  

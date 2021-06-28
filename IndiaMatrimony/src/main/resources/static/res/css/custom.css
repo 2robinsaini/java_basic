@@ -1,0 +1,110 @@
+.header {
+	/* width: 100%; */
+	/* padding: 10px; */
+	border-bottom: 1px solid #D3D3D3;
+	margin-left: 0%;
+	margin-right: 0%;
+	margin-top: 0%;
+	margin-bottom: 0%;
+	align-content: center;
+}
+
+.menu {
+	width: 20%;
+	height: 500px;
+	/* padding: 10px; */
+	/*  border: 1px solid gray; */
+	border-right: 1px solid pink;
+	margin-left: 0%;
+	margin-right: 0%;
+	margin-top: 0%;
+	margin-bottom: 0%;
+	align-content: center;
+}
+
+.body {
+	width: 80%;
+	height: 80%;
+	padding: 10px;
+	/* border: 1px solid red; */
+	margin-left: 0%;
+	margin-right: 0%;
+	margin-top: 0%;
+	margin-bottom: 0%;
+	align-content: center;
+}
+
+.bodyLogin {
+	width: 100%;
+	/* height: 70%; */
+	padding: 10px;
+	/* border: 1px solid red; */
+	margin-left: 0%;
+	margin-right: 0%;
+	margin-top: 0%;
+	margin-bottom: 0%;
+	align-content: center;
+}
+
+.footer {
+	/* width: 100%; */
+	/*  padding: 10px; */
+	border-top: 1px solid gray;
+	margin-left: 0%;
+	margin-right: 0%;
+	margin-top: 40%;
+	margin-bottom: 0%;
+	align-content: center;
+}
+
+.button {
+	display: block;
+	width: 115px;
+	height: 25px;
+	background: #4E9CAF;
+	padding: 10px;
+	text-align: center;
+	border-radius: 5px;
+	color: white;
+	font-weight: bold;
+	line-height: 25px;
+	text-decoration: none;
+}
+
+.smallbutton {
+	display: block;
+	width: 115px;
+	height: 15px;
+	background: #4E9CAF;
+	padding: 10px;
+	text-align: center;
+	border-radius: 5px;
+	color: white;
+	font-weight: bold;
+	line-height: 25px;
+	text-decoration: none;
+}
+
+.submitButton {
+	display: block;
+	width: 115px;
+	height: 40px;
+	background: #4E9CAF;
+	padding: 10px;
+	text-align: center;
+	border-radius: 5px;
+	color: white;
+	font-weight: bold;
+	line-height: 25px;
+	text-decoration: none;
+}
+
+.multiSelect {
+	
+	padding: 5px;
+	text-align: left;
+	position: relative;
+	width: 120%;
+	font-weight: bold;
+	background-color: initial;
+}
