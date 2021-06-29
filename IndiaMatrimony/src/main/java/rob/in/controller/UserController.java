@@ -1,5 +1,10 @@
 package rob.in.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,17 +14,22 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import rob.in.model.User;
 import rob.in.service.UserService;
@@ -28,6 +38,9 @@ import rob.in.service.UserService;
 public class UserController {
 
 	private String nextView = null;
+
+	@Value("${profile.image.path}")
+	private String imagePath;
 
 	@Autowired
 	private UserService usrService;
@@ -45,20 +58,18 @@ public class UserController {
 		System.out.println("In Login page");
 		return nextView;
 	}
-	
+
 	@GetMapping("/home")
-	public String home(Model model,HttpSession session) {
-		
-		
+	public String home(Model model, HttpSession session) {
+
 		if (session.getAttribute("signinuser") == null) {
 			return "login";
 		}
-		
+
 		nextView = "home";
 		return nextView;
 	}
 
-	
 	@RequestMapping(value = "/signout", method = RequestMethod.POST)
 	public String signout(ModelMap model, HttpSession session) {
 		System.out.println(session.getAttribute("signinuser") + " Signout Successfully..");
@@ -73,12 +84,14 @@ public class UserController {
 		List<User> allUsers = usrService.getAllUsers();
 
 		List<User> authUser = allUsers.stream().filter(user -> user.getEmail() != null
-				&& user.getEmail().equals(username) && user.getPassword().equals(password)).collect(Collectors.toList());
-		
-		if (authUser.size()==1) {
+				&& user.getEmail().equals(username) && user.getPassword().equals(password))
+				.collect(Collectors.toList());
+
+		if (authUser.size() == 1) {
 			nextView = "home";
 			session.setAttribute("signinuser", username);
 			session.setAttribute("gender", authUser.get(0).getGender());
+			session.setAttribute("userid", authUser.get(0).getId());
 		} else {
 			nextView = "login";
 			model.addAttribute("msg", "Bad Credentials!");
@@ -96,16 +109,13 @@ public class UserController {
 
 		nextView = "signup";
 
-		
-		
 		List<User> allUsers = usrService.getAllUsers();
 
 		List<User> signInuser = allUsers.stream().filter(usr -> usr.getEmail() != null && usr.getEmail().equals(email))
 				.collect(Collectors.toList());
 
-		
 		System.out.println("Email: " + email + " ==> " + signInuser.size());
-		
+
 		if (signInuser.size() > 0) {
 			map.addAttribute("user", signInuser.get(0));
 		} else {
@@ -140,6 +150,9 @@ public class UserController {
 		model.addAttribute("FoodType", allUsers.stream().map(usr -> usr.getFoodType()).collect(Collectors.toSet()));
 		model.addAttribute("Religion", allUsers.stream().map(usr -> usr.getReligion()).collect(Collectors.toSet()));
 		model.addAttribute("Cast", allUsers.stream().map(usr -> usr.getCast()).collect(Collectors.toSet()));
+
+		model.addAttribute("imagepath", imagePath);
+
 		return nextView;
 	}
 
@@ -166,8 +179,7 @@ public class UserController {
 
 		filterUser = filterUser.stream().filter(usr -> !usr.getEmail().equals(session.getAttribute("signinuser")))
 				.filter(usr -> !usr.getGender().equals(session.getAttribute("gender"))).collect(Collectors.toList());
-		
-		
+
 		if (state != null && !state.equals("")) {
 			if (state.contains(",")) {
 				List<String> stateList = Arrays.asList(state.split(","));
@@ -275,8 +287,42 @@ public class UserController {
 		model.addAttribute("FoodType", allUsers.stream().map(usr -> usr.getFoodType()).collect(Collectors.toSet()));
 		model.addAttribute("Religion", allUsers.stream().map(usr -> usr.getReligion()).collect(Collectors.toSet()));
 		model.addAttribute("Cast", allUsers.stream().map(usr -> usr.getCast()).collect(Collectors.toSet()));
-
+		model.addAttribute("imagepath", imagePath);
 		return nextView;
+	}
+
+	@RequestMapping(value = "image/{imageName}")
+	@ResponseBody
+	public byte[] getImage(@PathVariable(value = "imageName") String imageName) throws IOException {
+
+		File serverFile = new File(imagePath + File.separator + imageName + ".jpg");
+
+		return Files.readAllBytes(serverFile.toPath());
+	}
+
+	@PostMapping("/upload")
+	public String singleFileUpload(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes,
+			@RequestParam("userid") String userid) {
+
+		if (file.isEmpty()) {
+			redirectAttributes.addFlashAttribute("message", "Please select a file to upload");
+			return "redirect:uploadStatus";
+		}
+
+		try {
+
+			// Get the file and save it somewhere
+			byte[] bytes = file.getBytes();
+			Path path = Paths.get(imagePath + File.separator + userid + ".jpg");
+			Files.write(path, bytes);
+			redirectAttributes.addFlashAttribute("message",
+					"You successfully uploaded '" + file.getOriginalFilename() + "'");
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return "home";
 	}
 
 	@PutMapping("/signup")
@@ -302,16 +348,17 @@ public class UserController {
 			model.addAttribute("message", "Please Provide Proper Data!!");
 			return nextView;
 		} else {
-			nextView = "users";
+			nextView = "login";
 
 			System.out.println(user.toString());
 
 			usrService.addUser(user);
 			List<User> allUsers = usrService.getAllUsers();
-			
+
 			allUsers = allUsers.stream().filter(usr -> !usr.getEmail().equals(session.getAttribute("signinuser")))
-					.filter(usr -> !usr.getGender().equals(session.getAttribute("gender"))).collect(Collectors.toList());
-			
+					.filter(usr -> !usr.getGender().equals(session.getAttribute("gender")))
+					.collect(Collectors.toList());
+
 			model.addAttribute("userList", allUsers);
 			return nextView;
 		}
@@ -345,10 +392,10 @@ public class UserController {
 		nextView = "home";
 		usrService.updateUser(user);
 		List<User> allUsers = usrService.getAllUsers();
-		
+
 		allUsers = allUsers.stream().filter(usr -> !usr.getEmail().equals(session.getAttribute("signinuser")))
 				.filter(usr -> !usr.getGender().equals(session.getAttribute("gender"))).collect(Collectors.toList());
-		
+
 		model.addAttribute("userList", allUsers);
 		return nextView;
 	}

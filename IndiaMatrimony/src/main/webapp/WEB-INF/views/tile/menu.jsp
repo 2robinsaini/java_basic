@@ -14,7 +14,7 @@
 	<div align="center">
 		<a class="smallbutton" href="users">All Matches</a> <br>
 
-		<div style="width: 140px;">
+		<div style="width: 140px;border-bottom-width: 1px;">
 			<form action="filteruser">
 				<input class="submitButton" type="submit" value="Apply Filter">
 				
